@@ -1,0 +1,139 @@
+#include <stdio.h>
+#define MAX_PROCESSES 10
+
+int main() {
+    int n, i, time_quantum;
+    int burst_time[MAX_PROCESSES], remaining_time[MAX_PROCESSES];
+    int arrival_time[MAX_PROCESSES], waiting_time[MAX_PROCESSES] = {0}, turnaround_time[MAX_PROCESSES] = {0};
+    int current_time = 0, completed_processes = 0;
+    
+    printf("Enter the number of processes: ");
+    scanf("%d", &n);
+
+    
+    printf("Enter the arrival and burst time for each process:\n");
+    for (i = 0; i < n; i++) {
+        printf("Arrival time for process %d: ", i + 1);
+        scanf("%d", &arrival_time[i]);
+        printf("Burst time for process %d: ", i + 1);
+        scanf("%d", &burst_time[i]);
+        
+        
+        remaining_time[i] = burst_time[i];
+    }
+
+    printf("Enter the time quantum: ");
+    scanf("%d", &time_quantum);
+
+    int total_waiting_time = 0, total_turnaround_time = 0;
+    
+  
+    while (completed_processes < n) {
+        int all_done = 1; 
+        
+        for (i = 0; i < n; i++) {
+            
+            if (remaining_time[i] > 0 && arrival_time[i] <= current_time) {
+                all_done = 0; 
+                if (remaining_time[i] > time_quantum) {
+                    // Execute for the time quantum
+                    current_time += time_quantum;
+                    remaining_time[i] -= time_quantum;
+                } else {
+                    // Process will finish in this time slot
+                    current_time += remaining_time[i];
+                    waiting_time[i] = current_time - arrival_time[i] - burst_time[i];
+                    turnaround_time[i] = current_time - arrival_time[i];
+                    
+                    // Update totals
+                    total_waiting_time += waiting_time[i];
+                    total_turnaround_time += turnaround_time[i];
+                    
+                    remaining_time[i] = 0; // Process is complete
+                    completed_processes++;
+                }
+            }
+        }
+
+        if (all_done) {
+            // Increment time if no process was ready
+            current_time++;
+        }
+    }
+
+    // Calculate average waiting and turnaround times
+    double avg_waiting_time = (double)total_waiting_time / n;
+    double avg_turnaround_time = (double)total_turnaround_time / n;
+
+    // Display process details
+    printf("\nProcess\tBurst Time\tArrival Time\tWaiting Time\tTurnaround Time\n");
+    for (i = 0; i < n; i++) {
+        printf("P%d\t%d\t\t%d\t\t%d\t\t%d\n", i + 1, burst_time[i],
+               arrival_time[i], waiting_time[i], turnaround_time[i]);
+    }
+
+    // Display averages
+    printf("\nAverage Waiting Time: %.2f", avg_waiting_time);
+    printf("\nAverage Turnaround Time: %.2f", avg_turnaround_time);
+
+    return 0;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Constants and Variables:
+
+The code defines a maximum limit of 10 processes.
+Variables are initialized for process details: burst time (how long a process takes),
+ remaining time (time left to complete), arrival time, waiting time, and turnaround time.
+
+User Input:
+The user enters the number of processes, along with each process's arrival and burst times.
+The user also provides the time quantum, which defines the maximum time each process can execute in one turn.
+Round-Robin Scheduling:
+
+A while loop runs until all processes are completed.
+Each process is checked to see if it has arrived (its arrival time is
+ less than or equal to the current time) and if it has remaining time.
+If the process’s remaining time exceeds the time quantum, it executes for time quantum units,
+ reducing its remaining time by that amount, and current_time is incremented by the time quantum.
+If the remaining time is less than or equal to the time quantum, the process completes:
+current_time is updated with the time taken to finish the process.
+Waiting time is calculated as (current_time - arrival time - burst time).
+Turnaround time is calculated as (current_time - arrival time).
+These values are added to the totals, and completed_processes is incremented.
+Time Adjustment:
+
+If no processes were ready to execute (none had arrived or had remaining time), current_time is incremented by 1 to proceed to the next time unit.
+Average Calculation and Output:
+
+After all processes are complete, average waiting time and average turnaround time are calculated by
+ dividing the total waiting and turnaround times by the number of processes.
+The code then prints a table listing each process’s burst time, arrival time, waiting time, and turnaround time, along with the calculated averages.

@@ -1,0 +1,78 @@
+#!/bin/bash
+
+a=1
+while [ $a -eq 1 ]
+do
+    echo -e "\n**MENU**"
+    echo -e "1. Create an Address Book"
+    echo -e "2. Display Address Book"
+    echo -e "3. Insert Data"
+    echo -e "4. Delete Data"
+    echo -e "5. Modify Data"
+    echo -e "6. Exit"
+    echo -e "Enter your choice: "
+    read choice
+
+    case $choice in
+        1) # Create
+            echo -e "Enter the name of the address book: "
+            read fname
+            touch $fname
+            echo -e "File created successfully."
+            ;;
+        2) # Display
+            if [ -s $fname ]; then
+                echo -e "ID\tName\tRoll No\tCity\n"
+                cat $fname
+            else
+                echo -e "File is empty or not created yet."
+            fi
+            ;;
+        3) # Insert Data
+            echo -e "Enter ID:"
+            read ID
+            echo -e "Enter Name:"
+            read name
+            echo -e "Enter Roll No:"
+            read rollno
+            echo -e "Enter City:"
+            read city
+
+            echo -e "$ID\t$name\t$rollno\t$city" >> $fname
+            echo -e "Record inserted."
+            ;;
+        4) # Delete
+            echo -e "Enter the name of the record you want to delete: "
+            read dname
+            sed -i "/$dname/d" $fname
+            if [ $? -eq 0 ]; then
+                echo -e "Record deleted."
+            else
+                echo -e "Record not found."
+            fi
+            ;;
+        5) # Modify
+            echo -e "Enter the name of the record you want to modify: "
+            read old
+            if grep -q "$old" "$fname"; then
+                line=$(grep -n "$old" "$fname" | cut -d: -f1)
+                echo -e "Enter the new record (ID Name RollNo City): "
+                read new
+                sed -i "${line}s/.*/$new/" $fname
+                echo -e "Modification successful."
+            else
+                echo -e "Record not found."
+            fi
+            ;;
+        6) # Exit
+            echo -e "Exited."
+            exit 0
+            ;;
+        *) # Invalid input
+            echo -e "Invalid input. Please try again."
+            ;;
+    esac
+
+    echo -e "\nDo you want to continue? (0-No / 1-Yes)"
+    read a
+done

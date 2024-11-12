@@ -1,0 +1,130 @@
+#4]
+// Parent 
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <string.h>
+
+void sort_array(int *arr, int n) {
+    int temp;
+    for (int i = 0; i < n-1; i++) {
+        for (int j = 0; j < n-i-1; j++) {
+            if (arr[j] > arr[j+1]) {
+                temp = arr[j];
+                arr[j] = arr[j+1];
+                arr[j+1] = temp;
+            }
+        }
+    }
+}
+
+int main(int argc, char *argv[]) {
+    int n;
+    printf("Enter the number of elements: ");
+    scanf("%d", &n);
+
+    int arr[n];
+    printf("Enter the elements:\n");
+    for(int i = 0; i < n; i++) {
+        scanf("%d", &arr[i]);
+    }
+
+    sort_array(arr, n);
+
+    pid_t pid = fork();
+
+    if(pid < 0) {
+        fprintf(stderr, "Fork Failed");
+        return 1;
+    } else if(pid == 0) {
+        char *args[n + 2];
+        args[0] = "./child"; // Correct executable path
+
+        for(int i = 0; i < n; i++) {
+            args[i+1] = malloc(10);
+            sprintf(args[i+1], "%d", arr[i]);
+        }
+
+        args[n+1] = NULL;
+
+        execve(args[0], args, NULL);
+
+        perror("execve failed");
+        return 1;
+    } else { 
+        wait(NULL);
+        printf("Child process completed.\n");
+    }
+
+    return 0;
+}
+
+// Child
+
+#include <stdio.h>
+#include <stdlib.h>
+
+int main(int argc, char *argv[]) {
+    printf("Array in reverse order:\n");
+    for(int i = argc-1; i > 0; i--) {
+        printf("%s ", argv[i]);
+    }
+    printf("\n");
+    return 0;
+}
+
+// OUTPUT :
+
+student@student:~$ cd Downloads
+student@student:~/Downloads$ gcc -o parent parent.c
+student@student:~/Downloads$ gcc -o child child.c
+student@student:~/Downloads$ ./parent
+Enter the number of elements: 4
+Enter the elements:
+12
+3
+44
+5
+Array in reverse order:
+44 12 5 3 
+Child process completed.
+student@student:~/Downloads$ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*
+
+The program calls fork() to create a new process. If fork() 
+returns a negative value, it indicates an error in creating the process,
+ and the program exits with an error message.
+If pid is 0, it indicates we are in the child process
+.
+2.
+
+Here, the parent prepares the sorted array to pass to the child program child.
+It creates an array args to hold the arguments. args[0] holds the name of the executable ("./child").
+The sorted integers are converted to strings using sprintf and added to args.
+After setting up the arguments, it calls execve() to execute child with the sorted array.
+ If execve fails, it prints an error message.
+
+3.
